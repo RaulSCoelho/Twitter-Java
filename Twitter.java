@@ -5,8 +5,8 @@ import java.util.Scanner;
 public class Twitter {
   static Scanner input = new Scanner(System.in);
   static ArrayList<Usuario> users = new ArrayList<Usuario>(); // Lista de usuários
-  private static ArrayList<String> feed = new ArrayList<String>(); // Lista de todos os tweets
-  private static ArrayList<String> tweetOwners = new ArrayList<String>(); // Lista dos donos dos tweets
+  static ArrayList<String> feed = new ArrayList<String>(); // Lista de todos os tweets
+  static ArrayList<String> tweetOwners = new ArrayList<String>(); // Lista dos donos dos tweets
 
   public static void main(String[] args) {
     boolean endProgram = false;
