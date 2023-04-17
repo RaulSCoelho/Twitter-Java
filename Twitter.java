@@ -11,6 +11,8 @@ public class Twitter {
   public static void main(String[] args) {
     boolean endProgram = false;
 
+    About();
+
     do {
       int action = chooseAction();
 
@@ -42,15 +44,12 @@ public class Twitter {
           changePassword();
           break;
         case 9:
-          // #region REMOVER USUÁRIO
+          removeUser();
           break;
-        // #endregion
         case 10:
-          // #region IMPRIMIE ESTATÍSTICAS
+          printInfos();
           break;
-        // #endregion
         default:
-          // FINALIZAR-PROGRAMA
           endProgram = true;
       }
 
@@ -59,6 +58,7 @@ public class Twitter {
   }
 
   public static int chooseAction() {
+    // Função que retorna a opção escolhida pelo usuário
     System.out.println("Escolha uma ação: ");
     System.out.println("1 - Cadastrar usuário");
     System.out.println("2 - Listar usuários");
@@ -69,7 +69,7 @@ public class Twitter {
     System.out.println("7 - Remover tweet de um usuário");
     System.out.println("8 - Alterar senha de um usuário");
     System.out.println("9 - Remover um usuário");
-    System.out.println("10- Imprimir estatísticas");
+    System.out.println("10 - Imprimir estatísticas");
     System.out.println("0 - Finalizar programa");
 
     return nextInt();
@@ -77,19 +77,22 @@ public class Twitter {
 
   // #region Actions
   public static void createUser() {
+    // Função que recebe as informações do usuário e cria um novo usuário
     System.out.println("Para cadastrar um usuário será necessários algumas informações");
     String nome = nextLine("Nome: ");
     String login = nextLine("Login: ");
     String email = nextLine("Email: ");
     String senha = nextLine("Senha: ");
 
+    // Verifica se o usuário digitado já existe
     if (findUser(login, false) != null) {
       System.out.println("Usuario com esse login ja existe!");
       return;
     }
 
+    // Guardando esse usuário no arraylist users
     users.add(new Usuario(nome, login, email, senha));
-    System.out.println("Usuário cadastrado :)");
+    System.out.println("Usuário cadastrado e logado :)");
   }
 
   public static void printUsers() {
@@ -102,7 +105,10 @@ public class Twitter {
   public static void signIn() {
     Usuario user = findUser(true);
 
-    if (user != null && !user.isLogged())
+    if (user == null)
+      return;
+
+    if (!user.isLogged())
       user.signIn(user.getLogin(), nextLine("Senha: "));
     else
       System.out.println("Usuário já logado!!");
@@ -111,17 +117,22 @@ public class Twitter {
   public static void logOut() {
     Usuario user = findUser(true);
 
-    if (user != null && user.isLogged()) {
+    if (user == null)
+      return;
+
+    if (user.isLogged())
       user.logOut();
-    } else {
+    else
       System.out.println("Usuário já deslogado!!");
-    }
   }
 
   public static void tweet() {
     Usuario user = findUser(true);
 
-    if (user != null && user.isLogged()) {
+    if (user == null)
+      return;
+
+    if (user.isLogged()) {
       String tweet = nextLine("Tweet: ");
 
       user.tweet(tweet);
@@ -133,9 +144,14 @@ public class Twitter {
   }
 
   public static void printLastNTweets() {
-    ArrayList<String> lastNTweets = getLastNTweets(nextInt("Quantos tweets deseja ver? "));
-    for (String tweet : lastNTweets) {
-      System.out.println(tweet);
+    int nTweets = nextInt("Quantos tweets deseja ver? ");
+    ArrayList<String> lastNTweets = getLastNTweets(nTweets);
+    ArrayList<String> lastNTweetOwners = getLastNTweetOwners(nTweets);
+
+    for (int i = 0; i < lastNTweets.size(); i++) {
+      String owner = lastNTweetOwners.get(i);
+      String tweet = lastNTweets.get(i);
+      System.out.println(String.format("%s - %s", owner, tweet));
     }
   }
 
@@ -154,10 +170,10 @@ public class Twitter {
 
     System.out.println("Selecione um tweet: ");
     for (int i = 0; i < userTweets.size(); i++) {
-      System.out.println((i + 1) + userTweets.get(i));
+      System.out.println(String.format("%d - %s", i + 1, userTweets.get(i)));
     }
 
-    removeTweet(userTweets.get(nextInt() - 1), user.getLogin());
+    removeTweet(userTweets.get(nextInt() - 1), user);
   }
 
   public static void changePassword() {
@@ -165,6 +181,60 @@ public class Twitter {
 
     if (user != null)
       user.changePassword(nextLine("Senha antiga: "), nextLine("Senha nova: "));
+  }
+
+  public static void removeUser() {
+    Iterator<Usuario> userIterator = users.iterator();
+    Usuario user = findUser(true);
+
+    if (!user.signIn(user.getLogin(), nextLine("Digite a senha do usuario: ")))
+      return;
+
+    while (userIterator.hasNext()) {
+      if (userIterator.next().equals(user)) {
+        removeUserTweets(user);
+        userIterator.remove();
+        break;
+      }
+    }
+  }
+
+  public static void printInfos() {
+    int loggedUsers = 0;
+
+    for (Usuario user : users) {
+      if (user.isLogged())
+        loggedUsers++;
+    }
+
+    System.out.println("Estatísticas: ");
+    System.out.println("Número de usuários: " + users.size());
+    System.out.println("Número de usuários logados: " + loggedUsers);
+    System.out.println("Número de tweets: " + feed.size());
+    System.out.println("Número de tweets por usuário: ");
+
+    for (Usuario user : users) {
+      System.out.println(user.printTweets());
+    }
+
+    int maior = 0;
+    Usuario tweetedTheMost = users.get(0);
+
+    for (Usuario user : users) {
+      int tweetsSize = user.getTweets().size();
+
+      if (tweetsSize > maior) {
+        maior = tweetsSize;
+        tweetedTheMost = user;
+      }
+    }
+
+    System.out.println(
+        String.format("Usuario que mais tweetou foi: %s - %d", tweetedTheMost.getLogin(),
+            tweetedTheMost.getTweets().size()));
+
+    System.out.println(String.format("Ultimo usuario que tweetou: %s - %s", tweetOwners.get(tweetOwners.size() - 1),
+        feed.get(feed.size() - 1)));
   }
   // #endregion
 
@@ -195,24 +265,55 @@ public class Twitter {
     return new ArrayList<String>(feed.subList(startIndex, feed.size()));
   }
 
-  public static void removeTweet(String tweet, String user) {
-    Iterator<String> ownerIterator = tweetOwners.iterator();
+  public static ArrayList<String> getLastNTweetOwners(int nTweets) {
+    if (tweetOwners.size() < nTweets)
+      return tweetOwners;
+
+    int startIndex = tweetOwners.size() - nTweets;
+    return new ArrayList<String>(tweetOwners.subList(startIndex, tweetOwners.size()));
+  }
+
+  public static void removeTweet(String tweet, Usuario user) {
+    // Função que utiliza o iterator para remover o tweet de um usuário
     Iterator<String> feedIterator = feed.iterator();
+    Iterator<String> ownerIterator = tweetOwners.iterator();
 
-    boolean found = false;
     while (ownerIterator.hasNext() && feedIterator.hasNext()) {
-      String owner = ownerIterator.next();
       String feedItem = feedIterator.next();
+      String owner = ownerIterator.next();
 
-      if (owner.equals(user) && feedItem.equals(tweet)) {
-        ownerIterator.remove();
+      if (owner.equals(user.getLogin()) && feedItem.equals(tweet)) {
+        // Remove do arraylist da classe usuario
+        user.removeTweet(tweet);
+        // Remove do arraylist do feed geral de tweets
         feedIterator.remove();
-        break;
+        // Remove do arraylist com os donos dos tweets
+        ownerIterator.remove();
+        System.out.println("Tweet removido!");
+        return;
       }
     }
 
-    if (!found)
-      System.out.println("Tweet não encontrado!");
+    System.out.println("Tweet não encontrado!");
+  }
+
+  public static void removeUserTweets(Usuario user) {
+    Iterator<String> feedIterator = feed.iterator();
+    Iterator<String> ownerIterator = tweetOwners.iterator();
+
+    user.removeTweets();
+    while (ownerIterator.hasNext() && feedIterator.hasNext()) {
+      feedIterator.next();
+      String owner = ownerIterator.next();
+
+      if (owner.equals(user.getLogin())) {
+        // Remove do arraylist do feed geral de tweets
+        feedIterator.remove();
+        // Remove do arraylist com os donos dos tweets
+        ownerIterator.remove();
+      }
+    }
+    System.out.println("Todos os tweets do usuário foram removidos.");
   }
   // #endregion
 
@@ -248,4 +349,13 @@ public class Twitter {
     return number;
   }
   // #endregion
+
+  public static void About() {
+    System.out.println("\nBem vindo ao projeto Twitter em Java");
+    System.out.println("Projeto da matéria Desenvolvimento de Software da Universiade Positivo");
+    System.out.println("5º período do curso de Engenharia da Computação");
+    System.out.println("Realizado Por:");
+    System.out.println("Bruno Henrique Miranda de Oliveira");
+    System.out.println("Raul Semicek Coelho\n");
+  }
 }

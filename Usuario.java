@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Scanner;
 
 public class Usuario {
@@ -17,9 +18,16 @@ public class Usuario {
   }
 
   // #region Métodos restritos por usuário
-  @Override
-  public String toString() {
-    return String.format("\nNome: %s\nLogin: %s\nEmail: %s", nome, login, email);
+  public String printTweets() {
+    String result = String.format("%s: %d [\n", nome, tweets.size());
+
+    for (String tweet : tweets) {
+      result += String.format("  %s,\n", tweet);
+    }
+
+    result += "]";
+
+    return result;
   }
 
   public String getNome() {
@@ -54,6 +62,8 @@ public class Usuario {
       return;
 
     senha = newPassword;
+
+    System.out.println("Senha alterada com sucesso!");
   }
   // #endregion
 
@@ -62,11 +72,29 @@ public class Usuario {
     return tweets;
   }
 
+  public void removeTweets() {
+    tweets = new ArrayList<String>();
+  }
+
   public void tweet(String tweet) {
     if (!isTweetValid(tweet))
       return;
 
     tweets.add(tweet);
+  }
+
+  public void removeTweet(String tweet) {
+    // Remove tweet do arraylist de tweets do usuário, usando iterator
+    Iterator<String> iterator = tweets.iterator();
+
+    while (iterator.hasNext()) {
+      if (iterator.next().equals(tweet)) {
+        iterator.remove();
+        return;
+      }
+    }
+
+    System.out.println("Tweet não encontrado!");
   }
   // #endregion
   // #endregion
