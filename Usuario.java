@@ -38,6 +38,14 @@ public class Usuario {
     return login;
   }
 
+  public String getEmail() {
+    return email;
+  }
+
+  public boolean isLogged() {
+    return logged;
+  }
+
   // #region Auth Section
   public boolean signIn(String user, String password) {
     if (login.equals(user) && senha.equals(password)) {
@@ -50,17 +58,13 @@ public class Usuario {
     }
   }
 
-  public void logOut() {
+  public void signOut() {
     logged = false;
     System.out.println("Usuário deslogado!");
   }
 
-  public boolean isLogged() {
-    return logged;
-  }
-
   public void changePassword(String oldPassword, String newPassword) {
-    if (!isPasswordValid(oldPassword))
+    if (!isValidPassword(oldPassword))
       return;
 
     senha = newPassword;
@@ -79,7 +83,7 @@ public class Usuario {
   }
 
   public void tweet(String tweet) {
-    if (!isTweetValid(tweet))
+    if (!isValidTweet(tweet))
       return;
 
     tweets.add(tweet);
@@ -118,15 +122,15 @@ public class Usuario {
     return validateString(str, min, max, field, true);
   }
 
-  private boolean isPasswordValid(String password) {
+  private boolean isValidPassword(String password) {
     boolean valid = senha.equals(password);
     if (!valid)
       System.out.println("Senha incorreta!");
     return valid;
   }
 
-  private boolean isTweetValid(String tweet) {
-    if (validateString(tweet, 1, 140, "Tweet").isBlank())
+  private boolean isValidTweet(String tweet) {
+    if (validateString(tweet, 1, 140, "Tweet", false).isBlank())
       return false;
 
     for (String t : tweets) {

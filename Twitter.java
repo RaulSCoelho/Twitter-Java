@@ -29,7 +29,7 @@ public class Twitter {
           signIn();
           break;
         case 4:
-          logOut();
+          signOut();
           break;
         case 5:
           tweet();
@@ -85,8 +85,8 @@ public class Twitter {
     String senha = nextLine("Senha: ");
 
     // Verifica se o usuário digitado já existe
-    if (findUser(login, false) != null) {
-      System.out.println("Usuario com esse login ja existe!");
+    if (findUser(login, false) != null || findUserByEmail(email, false) != null) {
+      System.out.println("Usuario ja existente!");
       return;
     }
 
@@ -114,14 +114,14 @@ public class Twitter {
       System.out.println("Usuário já logado!!");
   }
 
-  public static void logOut() {
+  public static void signOut() {
     Usuario user = findUser(true);
 
     if (user == null)
       return;
 
     if (user.isLogged())
-      user.logOut();
+      user.signOut();
     else
       System.out.println("Usuário já deslogado!!");
   }
@@ -138,6 +138,7 @@ public class Twitter {
       user.tweet(tweet);
       tweetOwners.add(user.getLogin());
       feed.add(tweet);
+      System.out.println("Tweet feito com sucesso!");
     } else {
       System.out.println("Primeiro realize o login!");
     }
@@ -257,6 +258,24 @@ public class Twitter {
     return null;
   }
 
+  public static Usuario findUserByEmail(boolean showMessage) {
+    String email = nextLine("Email do usuário: ");
+    return findUserByEmail(email, showMessage);
+  }
+
+  public static Usuario findUserByEmail(String email, boolean showMessage) {
+    for (Usuario user : users) {
+      if (user.getEmail().equals(email)) {
+        return user;
+      }
+    }
+
+    if (showMessage)
+      System.out.println("Usuário não encontrado!");
+
+    return null;
+  }
+
   public static ArrayList<String> getLastNTweets(int nTweets) {
     if (feed.size() < nTweets)
       return feed;
@@ -333,20 +352,13 @@ public class Twitter {
   }
 
   public static int nextInt() {
-    int number = input.nextInt();
-    input.nextLine();
-    return number;
-  }
-
-  public static double nextDouble(String message) {
-    System.out.println(message);
-    return nextDouble();
-  }
-
-  public static double nextDouble() {
-    double number = input.nextDouble();
-    input.nextLine();
-    return number;
+    try {
+      int number = input.nextInt();
+      input.nextLine();
+      return number;
+    } catch (Exception ex) {
+      return nextInt("Você deve digitar um número inteiro: ");
+    }
   }
   // #endregion
 
