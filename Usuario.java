@@ -22,7 +22,7 @@ public class Usuario {
     String result = String.format("%s: %d [\n", nome, tweets.size());
 
     for (String tweet : tweets) {
-      result += String.format("  %s,\n", tweet);
+      result += String.format("  %s\n", tweet);
     }
 
     result += "]";
@@ -42,6 +42,7 @@ public class Usuario {
   public boolean signIn(String user, String password) {
     if (login.equals(user) && senha.equals(password)) {
       logged = true;
+      System.out.println("Usuário logado com sucesso!");
       return true;
     } else {
       System.out.println("Login ou senha inválidos");
@@ -51,6 +52,7 @@ public class Usuario {
 
   public void logOut() {
     logged = false;
+    System.out.println("Usuário deslogado!");
   }
 
   public boolean isLogged() {
