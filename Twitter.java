@@ -92,7 +92,7 @@ public class Twitter {
 
     // Guardando esse usuário no arraylist users
     users.add(new Usuario(nome, login, email, senha));
-    System.out.println("Usuário cadastrado e logado :)");
+    System.out.println("Usuário cadastrado :)");
   }
 
   public static void printUsers() {

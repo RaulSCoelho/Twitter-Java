@@ -14,7 +14,7 @@ public class Usuario {
     this.login = validateString(login, 2, 20, "Login");
     this.email = validateString(email, 6, 30, "Email");
     this.senha = validateString(senha, 6, 15, "Senha");
-    this.logged = true;
+    this.logged = false;
   }
 
   // #region Métodos restritos por usuário
