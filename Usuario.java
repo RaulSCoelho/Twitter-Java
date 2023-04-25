@@ -19,13 +19,20 @@ public class Usuario {
 
   // #region Métodos restritos por usuário
   public String printTweets() {
-    String result = String.format("%s: %d [\n", nome, tweets.size());
+    int tweetsSize = tweets.size();
+    String result = String.format("%s: %d", nome, tweetsSize);
 
-    for (String tweet : tweets) {
-      result += String.format("  %s\n", tweet);
+    if (tweetsSize > 0)
+      result += " [\n";
+
+    for (int i = 0; i < tweetsSize; i++) {
+      result += String.format("  %s", tweets.get(i));
+      if (i != tweetsSize - 1)
+        result += "\n";
     }
 
-    result += "]";
+    if (tweetsSize > 0)
+      result += "\n]";
 
     return result;
   }
@@ -82,11 +89,13 @@ public class Usuario {
     tweets = new ArrayList<String>();
   }
 
-  public void tweet(String tweet) {
+  public boolean tweet(String tweet) {
     if (!isValidTweet(tweet))
-      return;
+      return false;
 
     tweets.add(tweet);
+    System.out.println("Tweet feito com sucesso!");
+    return true;
   }
 
   public void removeTweet(String tweet) {
@@ -108,10 +117,12 @@ public class Usuario {
   // #region Métodos utilitários
   private String validateString(String str, int min, int max, String field, boolean askAgain) {
     if (str.length() < min || str.length() > max) {
-      System.out.println(String.format("%s deve ter de %d a %d caracteres.\nDigite novamente: ", field, min, max));
+      System.out.print(String.format("%s deve ter de %d a %d caracteres.\n", field, min, max));
 
       if (!askAgain)
         return null;
+
+      System.out.print("Digite novamente: ");
       return validateString(input.nextLine(), min, max, field);
     }
 
@@ -122,7 +133,7 @@ public class Usuario {
     return validateString(str, min, max, field, true);
   }
 
-  private boolean isValidPassword(String password) {
+  public boolean isValidPassword(String password) {
     boolean valid = senha.equals(password);
     if (!valid)
       System.out.println("Senha incorreta!");
@@ -130,7 +141,7 @@ public class Usuario {
   }
 
   private boolean isValidTweet(String tweet) {
-    if (validateString(tweet, 1, 140, "Tweet", false).isBlank())
+    if (validateString(tweet, 1, 140, "Tweet", false) == null)
       return false;
 
     for (String t : tweets) {

@@ -79,10 +79,10 @@ public class Twitter {
   public static void createUser() {
     // Função que recebe as informações do usuário e cria um novo usuário
     System.out.println("Para cadastrar um usuário será necessários algumas informações");
-    String nome = nextLine("Nome: ");
-    String login = nextLine("Login: ");
-    String email = nextLine("Email: ");
-    String senha = nextLine("Senha: ");
+    String nome = nextLine("Nome: ", false);
+    String login = nextLine("Login: ", false);
+    String email = nextLine("Email: ", false);
+    String senha = nextLine("Senha: ", false);
 
     // Verifica se o usuário digitado já existe
     if (findUser(login, false) != null || findUserByEmail(email, false) != null) {
@@ -109,7 +109,7 @@ public class Twitter {
       return;
 
     if (!user.isLogged())
-      user.signIn(user.getLogin(), nextLine("Senha: "));
+      user.signIn(user.getLogin(), nextLine("Senha: ", false));
     else
       System.out.println("Usuário já logado!!");
   }
@@ -132,13 +132,14 @@ public class Twitter {
     if (user == null)
       return;
 
+    // Verifica se o usuário esta logado
     if (user.isLogged()) {
-      String tweet = nextLine("Tweet: ");
-
-      user.tweet(tweet);
-      tweetOwners.add(user.getLogin());
-      feed.add(tweet);
-      System.out.println("Tweet feito com sucesso!");
+      String tweet = nextLine("Tweet: ", true);
+      // Verifica se o tweet foi salvo no arraylist de de tweets do usuário
+      if (user.tweet(tweet)) {
+        tweetOwners.add(user.getLogin());
+        feed.add(tweet);
+      }
     } else {
       System.out.println("Primeiro realize o login!");
     }
@@ -148,8 +149,14 @@ public class Twitter {
     int nTweets = nextInt("Quantos tweets deseja ver? ");
     ArrayList<String> lastNTweets = getLastNTweets(nTweets);
     ArrayList<String> lastNTweetOwners = getLastNTweetOwners(nTweets);
+    int lastNTweetsSize = lastNTweets.size();
 
-    for (int i = 0; i < lastNTweets.size(); i++) {
+    if (lastNTweetsSize == 0) {
+      System.out.println("Não há nenhum tweet ainda!");
+      return;
+    }
+
+    for (int i = 0; i < lastNTweetsSize; i++) {
       String owner = lastNTweetOwners.get(i);
       String tweet = lastNTweets.get(i);
       System.out.println(String.format("%s - %s", owner, tweet));
@@ -170,25 +177,37 @@ public class Twitter {
     ArrayList<String> userTweets = user.getTweets();
 
     System.out.println("Selecione um tweet: ");
-    for (int i = 0; i < userTweets.size(); i++) {
+
+    int userTweetsSize = userTweets.size();
+    for (int i = 0; i < userTweetsSize; i++) {
       System.out.println(String.format("%d - %s", i + 1, userTweets.get(i)));
     }
 
-    removeTweet(userTweets.get(nextInt() - 1), user);
+    int tweetNumber = nextInt();
+
+    while (tweetNumber <= 0 || tweetNumber > userTweetsSize) {
+      System.out.print("Valor inválido, digite novamente ou zero para cancelar: ");
+      tweetNumber = nextInt();
+
+      if (tweetNumber == 0)
+        return;
+    }
+
+    removeTweet(userTweets.get(tweetNumber - 1), user);
   }
 
   public static void changePassword() {
     Usuario user = findUser(true);
 
     if (user != null)
-      user.changePassword(nextLine("Senha antiga: "), nextLine("Senha nova: "));
+      user.changePassword(nextLine("Senha antiga: ", false), nextLine("Senha nova: ", false));
   }
 
   public static void removeUser() {
     Iterator<Usuario> userIterator = users.iterator();
     Usuario user = findUser(true);
 
-    if (!user.signIn(user.getLogin(), nextLine("Digite a senha do usuario: ")))
+    if (!user.isValidPassword(nextLine("Digite a senha do usuario: ", false)))
       return;
 
     while (userIterator.hasNext()) {
@@ -241,7 +260,7 @@ public class Twitter {
 
   // #region "Api"
   public static Usuario findUser(boolean showMessage) {
-    String login = nextLine("Login do usuário: ");
+    String login = nextLine("Login do usuário: ", false);
     return findUser(login, showMessage);
   }
 
@@ -259,7 +278,7 @@ public class Twitter {
   }
 
   public static Usuario findUserByEmail(boolean showMessage) {
-    String email = nextLine("Email do usuário: ");
+    String email = nextLine("Email do usuário: ", false);
     return findUserByEmail(email, showMessage);
   }
 
@@ -337,8 +356,12 @@ public class Twitter {
   // #endregion
 
   // #region Utils
-  public static String nextLine(String message) {
-    System.out.println(message);
+  public static String nextLine(String message, boolean jumpLine) {
+    if (jumpLine)
+      System.out.println(message);
+    else
+      System.out.print(message);
+
     return nextLine();
   }
 
@@ -347,7 +370,7 @@ public class Twitter {
   }
 
   public static int nextInt(String message) {
-    System.out.println(message);
+    System.out.print(message);
     return nextInt();
   }
 
@@ -357,6 +380,7 @@ public class Twitter {
       input.nextLine();
       return number;
     } catch (Exception ex) {
+      input.nextLine();
       return nextInt("Você deve digitar um número inteiro: ");
     }
   }
