@@ -96,6 +96,11 @@ public class Twitter {
   }
 
   public static void printUsers() {
+    if (users.size() == 0) {
+      System.out.println("Não há nenhum usuário!");
+      return;
+    }
+
     System.out.println("Usuários: ");
     for (Usuario user : users) {
       System.out.println(user.getLogin() + ": " + (user.isLogged() ? "Logado" : "Não logado"));
@@ -176,6 +181,11 @@ public class Twitter {
 
     ArrayList<String> userTweets = user.getTweets();
 
+    if (userTweets.size() == 0) {
+      System.out.println("Este usuário não tem nenhum tweet.");
+      return;
+    }
+
     System.out.println("Selecione um tweet: ");
 
     int userTweetsSize = userTweets.size();
@@ -207,6 +217,9 @@ public class Twitter {
     Iterator<Usuario> userIterator = users.iterator();
     Usuario user = findUser(true);
 
+    if (user == null)
+      return;
+
     if (!user.isValidPassword(nextLine("Digite a senha do usuario: ", false)))
       return;
 
@@ -231,30 +244,40 @@ public class Twitter {
     System.out.println("Número de usuários: " + users.size());
     System.out.println("Número de usuários logados: " + loggedUsers);
     System.out.println("Número de tweets: " + feed.size());
-    System.out.println("Número de tweets por usuário: ");
-
-    for (Usuario user : users) {
-      System.out.println(user.printTweets());
-    }
-
-    int maior = 0;
-    Usuario tweetedTheMost = users.get(0);
-
-    for (Usuario user : users) {
-      int tweetsSize = user.getTweets().size();
-
-      if (tweetsSize > maior) {
-        maior = tweetsSize;
-        tweetedTheMost = user;
+    if (users.size() > 0) {
+      System.out.println("Número de tweets por usuário: ");
+      for (Usuario user : users) {
+        System.out.println(user.printTweets());
       }
+
+      if (feed.size() > 0) {
+        int maior = 0;
+        Usuario tweetedTheMost = users.get(0);
+
+        for (Usuario user : users) {
+          int tweetsSize = user.getTweets().size();
+
+          if (tweetsSize > maior) {
+            maior = tweetsSize;
+            tweetedTheMost = user;
+          }
+        }
+
+        System.out.println(
+            String.format("Usuario que mais tweetou foi: %s - %d", tweetedTheMost.getLogin(),
+                tweetedTheMost.getTweets().size()));
+
+        System.out.println(String.format("Ultimo usuario que tweetou: %s - %s", tweetOwners.get(tweetOwners.size() - 1),
+            feed.get(feed.size() - 1)));
+      } else {
+        System.out.println("Usuario que mais tweetou foi: Não há tweets.");
+        System.out.println("último usuario que tweetou: Não há tweets.");
+      }
+    } else {
+      System.out.println("Número de tweets por usuário: 0");
+      System.out.println("Usuario que mais tweetou foi: Não há tweets.");
+      System.out.println("último usuario que tweetou: Não há tweets.");
     }
-
-    System.out.println(
-        String.format("Usuario que mais tweetou foi: %s - %d", tweetedTheMost.getLogin(),
-            tweetedTheMost.getTweets().size()));
-
-    System.out.println(String.format("Ultimo usuario que tweetou: %s - %s", tweetOwners.get(tweetOwners.size() - 1),
-        feed.get(feed.size() - 1)));
   }
   // #endregion
 
